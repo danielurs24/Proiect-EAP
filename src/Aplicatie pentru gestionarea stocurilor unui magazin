@@ -1,0 +1,37 @@
+Am facut o aplicatie care se ocupa de gestionare stocului unui Magazin de Electrocasnice
+
+In aplicatie regasim urmatoarele clase:
+
+categorii(clasa de baza pentru categoriile produselor)
+
+    IT (clasa derivata unde se introduc produsele din domeniul It, Telefoane sau Gadgeturi)
+    Electrocasnice(clasa derivata unde se introduc produsele Electrocasnice)
+
+distribuitori(clasa de baza pentru distribuitorii regasiti in aplicatie)
+
+    distribuitor_intern(Clasa derivata unde se introduc distribuitorii din tara)
+    distribuitor_extern(Clasa derivata unde se introduc distribuitorii din afara tarii)
+
+produse(clasa de baza pentru produsele din aplicatie)
+
+    Laptop
+    Masina_de_spalat
+    Telefon
+    Frigider
+
+    clase derivate care reprezinta cate produsele
+
+
+Actiuni:
+
+1.Adaugare produse
+2.Adaugare distribuitori
+3.Afisare toate produsele
+4.Afisare toti distribuitorii
+5.Afisare toate categoriile
+6.Adaugare produse in stoc
+7.Afisare distribuitori sortati
+8.Cautare produs
+
+In toate functiile tasta 0 intoarce la meniul aterior
+
