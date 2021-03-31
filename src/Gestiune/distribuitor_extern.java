@@ -2,23 +2,15 @@ package Gestiune;
 
 public class distribuitor_extern extends distribuitori {
 
-    private int timp_livrare;
+
     private String tara;
     private String depozit_apropiat;
 
     public distribuitor_extern(String nume, String numar_telefon, String adresa, int timp_livrare, String tara, String depozit_apropiat) {
-        super(nume, numar_telefon, adresa);
-        this.timp_livrare = timp_livrare;
+
+        super(nume, numar_telefon, adresa, timp_livrare);
         this.tara = tara;
         this.depozit_apropiat = depozit_apropiat;
-    }
-
-    public int getTimp_livrare() {
-        return timp_livrare;
-    }
-
-    public void setTimp_livrare(int timp_livrare) {
-        this.timp_livrare = timp_livrare;
     }
 
     public String getTara() {
@@ -35,5 +27,11 @@ public class distribuitor_extern extends distribuitori {
 
     public void setDepozit_apropiat(String depozit_apropiat) {
         this.depozit_apropiat = depozit_apropiat;
+    }
+
+    @Override
+    public String toString() {
+        return getNume() + " " + getNumar_telefon() + " " +
+                getAdresa() + " " + getTimp_livrare() + " " + tara + " " + depozit_apropiat;
     }
 }
