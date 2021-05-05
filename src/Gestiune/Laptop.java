@@ -2,22 +2,21 @@ package Gestiune;
 
 public class Laptop extends produse {
 
-    private String procesor;
+    private procesor procesor;
     private int ram;
 
 
-    public Laptop(String nume, double pret, categorii categorie, String procesor, int ram) {
+    public Laptop(String nume, double pret, categorii categorie, Gestiune.procesor procesor, int ram) {
         super(nume, pret, categorie);
         this.procesor = procesor;
         this.ram = ram;
-
     }
 
-    public String getProcesor() {
+    public Gestiune.procesor getProcesor() {
         return procesor;
     }
 
-    public void setProcesor(String procesor) {
+    public void setProcesor(Gestiune.procesor procesor) {
         this.procesor = procesor;
     }
 

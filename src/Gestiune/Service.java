@@ -1,7 +1,15 @@
 package Gestiune;
 
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+
+import java.io.*;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Scanner;
 
 public class Service {
@@ -13,10 +21,25 @@ public class Service {
 //   categorii categ_laptop_gaming = new IT("Laptop-uri", 30,"Gaming");
 //   categorii categ_telefon = new IT("Telefoane", 25, "Smartphone");
 
+    private static Service instance = null;
+
+    public static Service Singleton()
+    {
+        if (instance == null)
+        {
+            instance = new Service();
+        }
+        return instance;
+    }
+
 
     ArrayList<produse> produs = new ArrayList<>();
     ArrayList<categorii> categ = new ArrayList<>();
-    ArrayList<distribuitori> dist = new ArrayList<>( );
+    ArrayList<distribuitori> dist = new ArrayList<>();
+    ArrayList<procesor> procesor = new ArrayList<>();
+
+    List<String[]> data = new ArrayList<String[]>();
+
 
     public ArrayList<distribuitori> getDist() {
         return dist;
@@ -42,7 +65,216 @@ public class Service {
         return produs;
     }
 
+    public ArrayList<Gestiune.procesor> getProcesor() {
+        return procesor;
+    }
 
+    public void setProcesor(ArrayList<Gestiune.procesor> procesor) {
+        this.procesor = procesor;
+    }
+
+    public List<String[]> getData() {
+        return data;
+    }
+
+    public void setData(List<String[]> data) {
+        this.data = data;
+    }
+
+    public categorii getCategByName(String name) {
+        for(categorii c : categ) {
+            if(c.getNume().equals(name))
+                return c;
+        }
+        return null;
+    }
+
+    public procesor getProcesorByName(String name) {
+        for(procesor p : procesor){
+            if(p.getModel().equals(name))
+                return p;
+        }
+        return null;
+
+    }
+
+
+    public Reader citesteCsv(String fisier) throws URISyntaxException, IOException {
+        return Files.newBufferedReader(Paths.get(ClassLoader.getSystemResource(fisier).toURI()));
+    }
+
+    public void adaugareDateCSV(){
+        File file = new File("audit.csv");
+        try {
+            FileWriter outputfile = new FileWriter(file);
+            CSVWriter writer = new CSVWriter(outputfile);
+            writer.writeAll(getData());
+            writer.close();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<distribuitori> citestedistribuitori() {
+        ArrayList<distribuitori> distribuitori = new ArrayList<>();
+
+        try {
+
+            Reader reader = citesteCsv("distribuitori.csv");
+            CSVReader csvReader = new CSVReader(reader);
+            List<String[]> list = csvReader.readAll();
+            for(String[] line : list) {
+
+                if(line.length < 1) continue;
+                String categorie = line[0].trim();
+                if(categorie.equals("intern")) {
+                    if(line.length < 6) continue;
+                    distribuitori.add(new distribuitor_intern(
+                            line[1],
+                            line[2],
+                            line[3],
+                            Integer.parseInt(line[4]),
+                            line[5]
+                    ));
+                } else if(categorie.equals("extern")) {
+                    if(line.length < 7) continue;
+                    distribuitori.add(new distribuitor_extern(
+                            line[1],
+                            line[2],
+                            line[3],
+                            Integer.parseInt(line[4]),
+                            line[5],
+                            line[6]
+                    ));
+                }
+            }
+            reader.close();
+            csvReader.close();
+
+        } catch(Exception ignored) {}
+
+        return distribuitori;
+    }
+
+    public ArrayList<procesor> citesteProcesoare() {
+        ArrayList<procesor> procesor = new ArrayList<>();
+
+        try {
+
+            Reader reader = citesteCsv("procesoare.csv");
+            CSVReader csvReader = new CSVReader(reader);
+            List<String[]> list = csvReader.readAll();
+            for(String[] line : list) {
+
+                if(line.length < 1) continue;
+                procesor.add(new procesor(
+                        line[1],
+                        line[2],
+                        line[3]
+                ));
+            }
+            reader.close();
+            csvReader.close();
+
+        } catch(Exception ignored) {}
+
+        return procesor;
+    }
+
+    public ArrayList<categorii> citesteCategorii() {
+        ArrayList<categorii> categorii = new ArrayList<>();
+
+        try {
+
+            Reader reader = citesteCsv("categorii.csv");
+            CSVReader csvReader = new CSVReader(reader);
+            List<String[]> list = csvReader.readAll();
+            for(String[] line : list) {
+
+                if(line.length < 1) continue;
+                String categorie = line[0].trim();
+                if(categorie.equals("electrocasnice")) {
+                    if(line.length < 4) continue;
+                    categorii.add(new Electrocasnice(
+                            line[1],
+                            Integer.parseInt(line[2]),
+                            line[3]
+                    ));
+                } else if(categorie.equals("it")) {
+                    if(line.length < 4) continue;
+                    categorii.add(new IT(
+                            line[1],
+                            Integer.parseInt(line[2]),
+                            line[3]
+                    ));
+                }
+            }
+            reader.close();
+            csvReader.close();
+
+        } catch(Exception ignored) {}
+
+        return categorii;
+    }
+
+    public ArrayList<produse> citesteProduse() {
+        ArrayList<produse> produse = new ArrayList<>();
+
+        try {
+
+            Reader reader = citesteCsv("produse.csv");
+            CSVReader csvReader = new CSVReader(reader);
+            List<String[]> list = csvReader.readAll();
+            for(String[] line : list) {
+
+                if(line.length < 1) continue;
+                String categorie = line[0].trim();
+                if(categorie.equals("frigider")) {
+                    if(line.length < 6) continue;
+                    produse.add(new Frigider(
+                            line[1],
+                            Double.parseDouble(line[2]),
+                            getCategByName(line[3]),
+                            Integer.parseInt(line[4]),
+                            Integer.parseInt(line[5])
+                    ));
+                } else if(categorie.equals("masina_de_spalat")) {
+                    if(line.length < 6) continue;
+                    produse.add(new Masina_de_spalat(
+                            line[1],
+                            Double.parseDouble(line[2]),
+                            getCategByName(line[3]),
+                            Integer.parseInt(line[4]),
+                            Integer.parseInt(line[5])
+                    ));
+                } else if(categorie.equals("laptop")) {
+                    if(line.length < 6) continue;
+                    produse.add(new Laptop(
+                            line[1],
+                            Double.parseDouble(line[2]),
+                            getCategByName(line[3]),
+                            getProcesorByName(line[4]),
+                            Integer.parseInt(line[5])
+                    ));
+                } else if(categorie.equals("telefon")) {
+                    if(line.length < 6) continue;
+                    produse.add(new Telefon(
+                            line[1],
+                            Double.parseDouble(line[2]),
+                            getCategByName(line[3]),
+                            Integer.parseInt(line[4]),
+                            Double.parseDouble(line[5])
+                    ));
+                }
+            }
+            reader.close();
+            csvReader.close();
+
+        } catch(Exception ignored) {}
+
+        return produse;
+    }
 
     public produse adaugare_produs()
     {
@@ -102,7 +334,7 @@ public class Service {
             String nume = scanner.next();
             int pret = scanner.nextInt();
             //int categ = scanner.nextInt();
-            String procesor = scanner.next();
+            procesor procesor = getProcesorByName(scanner.next());
             int ram = scanner.nextInt();
             categorii cat = getCateg( ).get(categ);
 
