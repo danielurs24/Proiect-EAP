@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.sql.*;
 
 public class Service {
 
@@ -20,6 +21,25 @@ public class Service {
 //   categorii categ_masini_de_spalat = new Electrocasnice("Masini de spalat", 25, "Spalat Vase");
 //   categorii categ_laptop_gaming = new IT("Laptop-uri", 30,"Gaming");
 //   categorii categ_telefon = new IT("Telefoane", 25, "Smartphone");
+
+    private static Connection con;
+
+    public static Connection sqlConnection(){
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            con=DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/java","root","123456");
+
+           // con.close();
+        }catch(Exception e){ System.out.println(e);}
+        return con;
+    }
+
+    public static void closeSqlConnection() throws SQLException {
+        con.close();
+        System.out.println("Conexiune Inchisa!");
+    }
+
 
     private static Service instance = null;
 
@@ -97,6 +117,8 @@ public class Service {
         return null;
 
     }
+
+
 
 
     public Reader citesteCsv(String fisier) throws URISyntaxException, IOException {
@@ -218,67 +240,115 @@ public class Service {
         return categorii;
     }
 
-    public ArrayList<produse> citesteProduse() {
+    public ArrayList<produse> citesteProduse() throws SQLException {
         ArrayList<produse> produse = new ArrayList<>();
+        Connection connection = sqlConnection();
+        Statement stmt=con.createStatement();
 
-        try {
 
-            Reader reader = citesteCsv("produse.csv");
-            CSVReader csvReader = new CSVReader(reader);
-            List<String[]> list = csvReader.readAll();
-            for(String[] line : list) {
+        ResultSet rs=stmt.executeQuery("select * from telefon");
+        while(rs.next()) {
+//            System.out.println(rs.getString("nume")+"  "+rs.getDouble("pret")+"  "+rs.getString("categorie")
+//                                            +"  "+rs.getInt("pixeli_camera")+"  "+rs.getInt("dimensiune_ecran"));
 
-                if(line.length < 1) continue;
-                String categorie = line[0].trim();
-                if(categorie.equals("frigider")) {
-                    if(line.length < 6) continue;
-                    produse.add(new Frigider(
-                            line[1],
-                            Double.parseDouble(line[2]),
-                            getCategByName(line[3]),
-                            Integer.parseInt(line[4]),
-                            Integer.parseInt(line[5])
-                    ));
-                } else if(categorie.equals("masina_de_spalat")) {
-                    if(line.length < 6) continue;
-                    produse.add(new Masina_de_spalat(
-                            line[1],
-                            Double.parseDouble(line[2]),
-                            getCategByName(line[3]),
-                            Integer.parseInt(line[4]),
-                            Integer.parseInt(line[5])
-                    ));
-                } else if(categorie.equals("laptop")) {
-                    if(line.length < 6) continue;
-                    produse.add(new Laptop(
-                            line[1],
-                            Double.parseDouble(line[2]),
-                            getCategByName(line[3]),
-                            getProcesorByName(line[4]),
-                            Integer.parseInt(line[5])
-                    ));
-                } else if(categorie.equals("telefon")) {
-                    if(line.length < 6) continue;
-                    produse.add(new Telefon(
-                            line[1],
-                            Double.parseDouble(line[2]),
-                            getCategByName(line[3]),
-                            Integer.parseInt(line[4]),
-                            Double.parseDouble(line[5])
-                    ));
-                }
-            }
-            reader.close();
-            csvReader.close();
+            produse.add(new Telefon(rs.getString("nume"), rs.getDouble("pret"), getCategByName(rs.getString("categorie")),
+                    rs.getInt("pixeli_camera"), rs.getInt("dimensiune_ecran")));
+        }
 
-        } catch(Exception ignored) {}
+        rs = stmt.executeQuery("select * from frigider");
+        while(rs.next()) {
+//            System.out.println(rs.getString("nume")+"  "+rs.getDouble("pret")+"  "+rs.getString("categorie")
+//                                            +"  "+rs.getInt("pixeli_camera")+"  "+rs.getInt("dimensiune_ecran"));
+
+            produse.add(new Frigider(rs.getString("nume"),rs.getDouble("pret"),getCategByName(rs.getString("categorie")),
+                                    rs.getInt("numar_usi"),rs.getInt("volum")));
+        }
+
+        rs = stmt.executeQuery("select * from laptop");
+        while(rs.next()) {
+//            System.out.println(rs.getString("nume")+"  "+rs.getDouble("pret")+"  "+rs.getString("categorie")
+//                                            +"  "+rs.getInt("pixeli_camera")+"  "+rs.getInt("dimensiune_ecran"));
+
+            produse.add(new Laptop(rs.getString("nume"),rs.getDouble("pret"),getCategByName(rs.getString("categorie")),
+                    getProcesorByName(rs.getString("procesor")),rs.getInt("ram")));
+        }
+
+        rs = stmt.executeQuery("select * from masina_de_spalat");
+        while(rs.next()) {
+//            System.out.println(rs.getString("nume")+"  "+rs.getDouble("pret")+"  "+rs.getString("categorie")
+//                                            +"  "+rs.getInt("pixeli_camera")+"  "+rs.getInt("dimensiune_ecran"));
+
+            produse.add(new Masina_de_spalat(rs.getString("nume"),rs.getDouble("pret"),getCategByName(rs.getString("categorie")),
+                    rs.getInt("capacitate"),rs.getInt("viteza_de_uscare")));
+        }
 
         return produse;
     }
 
-    public produse adaugare_produs()
-    {
+//    public ArrayList<produse> citesteProduse() {
+//        ArrayList<produse> produse = new ArrayList<>();
+//
+//        try {
+//
+//            Reader reader = citesteCsv("produse.csv");
+//            CSVReader csvReader = new CSVReader(reader);
+//            List<String[]> list = csvReader.readAll();
+//            for(String[] line : list) {
+//
+//                if(line.length < 1) continue;
+//                String categorie = line[0].trim();
+//                if(categorie.equals("frigider")) {
+//                    if(line.length < 6) continue;
+//                    produse.add(new Frigider(
+//                            line[1],
+//                            Double.parseDouble(line[2]),
+//                            getCategByName(line[3]),
+//                            Integer.parseInt(line[4]),
+//                            Integer.parseInt(line[5])
+//                    ));
+//                } else if(categorie.equals("masina_de_spalat")) {
+//                    if(line.length < 6) continue;
+//                    produse.add(new Masina_de_spalat(
+//                            line[1],
+//                            Double.parseDouble(line[2]),
+//                            getCategByName(line[3]),
+//                            Integer.parseInt(line[4]),
+//                            Integer.parseInt(line[5])
+//                    ));
+//                } else if(categorie.equals("laptop")) {
+//                    if(line.length < 6) continue;
+//                    produse.add(new Laptop(
+//                            line[1],
+//                            Double.parseDouble(line[2]),
+//                            getCategByName(line[3]),
+//                            getProcesorByName(line[4]),
+//                            Integer.parseInt(line[5])
+//                    ));
+//                } else if(categorie.equals("telefon")) {
+//                    if(line.length < 6) continue;
+//                    produse.add(new Telefon(
+//                            line[1],
+//                            Double.parseDouble(line[2]),
+//                            getCategByName(line[3]),
+//                            Integer.parseInt(line[4]),
+//                            Double.parseDouble(line[5])
+//                    ));
+//                }
+//            }
+//            reader.close();
+//            csvReader.close();
+//
+//        } catch(Exception ignored) {}
+//
+//        return produse;
+//    }
+
+    public produse adaugare_produs() throws SQLException {
         System.out.println("Categorii");
+        Connection connection = sqlConnection();
+        Statement stmt=con.createStatement();
+        PreparedStatement rs;
+
         for (int i=0; i<getCateg().size(); i ++)
         {   int j = i + 1;
             System.out.println( j + "." + getCateg( ).get(i).getNume());
@@ -294,12 +364,19 @@ public class Service {
 
             String nume_frigider = scanner.next();
             int pret_frigider = scanner.nextInt();
-            //int categ = scanner.nextInt();
+
             int numar_usi_frigider = scanner.nextInt();
             int volum_frigider = scanner.nextInt();
             categorii cat = getCateg( ).get(categ);
 
             produs_adaugare = new Frigider(nume_frigider,pret_frigider,cat,numar_usi_frigider,volum_frigider);
+            rs = connection.prepareStatement("INSERT INTO `frigider`(`nume`, `categorie`, `numar_usi`, `volum`, `pret`) VALUES (?,?,?,?,?)");
+            rs.setString(1,nume_frigider);
+            rs.setString(2,getCateg( ).get(categ).toString());
+            rs.setInt(3,numar_usi_frigider);
+            rs.setInt(4,volum_frigider);
+            rs.setDouble(5,pret_frigider);
+            rs.execute();
             //return frigider;
         }
         if (categ == 1)
@@ -313,6 +390,13 @@ public class Service {
             categorii cat = getCateg( ).get(categ);
 
             produs_adaugare = new Masina_de_spalat(nume,pret,cat,capacitate,viteza_uscare);
+            rs = connection.prepareStatement("INSERT INTO `masina_de_spalat`(`nume`, `categorie`, `capacitate`, `viteza_de_uscare`, `pret`) VALUES (?,?,?,?,?)");
+            rs.setString(1,nume);
+            rs.setString(2,getCateg( ).get(categ).toString());
+            rs.setInt(3,capacitate);
+            rs.setInt(4,viteza_uscare);
+            rs.setDouble(5,pret);
+            rs.execute();
             //return masina_de_spalat;
         }
         if (categ == 3)
@@ -326,6 +410,13 @@ public class Service {
             categorii cat = getCateg( ).get(categ);
 
             produs_adaugare = new Telefon(nume,pret,cat,pixeli,dimensiune);
+            rs = connection.prepareStatement("INSERT INTO `telefon`(`nume`, `pret`, `categorie`, `pixeli_camera`, `dimensiune_ecran`) VALUES (?,?,?,?,?)");
+            rs.setString(1,nume);
+            rs.setString(3,getCateg( ).get(categ).toString());
+            rs.setInt(4,pixeli);
+            rs.setInt(5,dimensiune);
+            rs.setDouble(2,pret);
+            rs.execute();
             //return telefon;
         }
         if (categ == 2)
@@ -334,18 +425,29 @@ public class Service {
             String nume = scanner.next();
             int pret = scanner.nextInt();
             //int categ = scanner.nextInt();
-            procesor procesor = getProcesorByName(scanner.next());
+            String procesor_name = scanner.next();
+            procesor procesor = getProcesorByName(procesor_name);
             int ram = scanner.nextInt();
             categorii cat = getCateg( ).get(categ);
 
             produs_adaugare = new Laptop(nume,pret,cat,procesor,ram);
+            rs = connection.prepareStatement("INSERT INTO `laptop`(`nume`, `pret`, `categorie`, `procesor`, `ram`) VALUES (?,?,?,?,?)");
+            rs.setString(1,nume);
+            rs.setString(3,getCateg( ).get(categ).toString());
+            rs.setString(4,procesor_name);
+            rs.setInt(5,ram);
+            rs.setDouble(2,pret);
+            rs.execute();
             //return frigider;
         }
 
         return produs_adaugare;
     }
-    public void cautare_produs()
-    {   int val = 1;
+    public void cautare_produs() throws SQLException {
+        Connection connection = sqlConnection();
+        Statement stmt=con.createStatement();
+        PreparedStatement rs;
+        int val = 1;
         Scanner scanner = new Scanner(System.in);
         int categ = 1;
         while (val != 0) {
@@ -399,8 +501,127 @@ public class Service {
                     System.out.println( );
                     for (int i = 0; i < getProdus( ).size( ); i++) {
                         if(getProdus().get(i) != null)
-                            if (getProdus( ).get(i).getNume( ).contains(nume))
+                            if (getProdus( ).get(i).getNume( ).contains(nume)){
                                 System.out.println(getProdus( ).get(i).getNume( ) + " " + getProdus( ).get(i).getPret( ));
+                                System.out.println("1.Editare Produs");
+                                System.out.println("2.Stergere Produs");
+                                int edit;
+                                edit = scanner.nextInt( );
+                                if(edit ==  1)
+                                {
+                                    if (getProdus( ).get(i).getCategorie().toString().contains("Aparate Frigorifice"))
+                                    {   System.out.println("");
+                                        System.out.println("Editare Frigider: Nume, Numar Usi, Volum, Pret");
+                                        String nume_frigider = scanner.next();
+                                        int numar_usi = scanner.nextInt();
+                                        int volum = scanner.nextInt();
+                                        int pret = scanner.nextInt();
+
+
+
+                                        rs = connection.prepareStatement("UPDATE `frigider` SET `nume`=?, `numar_usi`=?, `volum`=?, `pret`=? WHERE `nume`=? ");
+                                        rs.setString(1,nume_frigider);
+                                        rs.setInt(2,numar_usi);
+                                        rs.setInt(3,volum);
+                                        rs.setInt(4,pret);
+                                        rs.setString(5,getProdus().get(i).getNume());
+                                        int rowsUpdated = rs.executeUpdate();
+                                        if(rowsUpdated > 0)
+                                            System.out.println("Produsul a fost modificat cu succes!");
+                                    }
+                                    else if (getProdus( ).get(i).getCategorie().toString().contains("Masini de spalat"))
+                                    {   System.out.println("");
+                                        System.out.println("Editare Masina de spalat: Nume, Capacitate, Viteza de Uscare, Pret");
+                                        String nume_masina = scanner.next();
+                                        int capacitate = scanner.nextInt();
+                                        int viteza_de_uscare = scanner.nextInt();
+                                        int pret = scanner.nextInt();
+
+                                        rs = connection.prepareStatement("UPDATE `masina_de_spalat` SET `nume`=?, `capacitate`=?, `viteza_de_uscare`=?, `pret`=? WHERE `nume`=? ");
+                                        rs.setString(1,nume_masina);
+                                        rs.setInt(2,capacitate);
+                                        rs.setInt(3,viteza_de_uscare);
+                                        rs.setInt(4,pret);
+                                        rs.setString(5,getProdus().get(i).getNume());
+                                        int rowsUpdated = rs.executeUpdate();
+                                        if(rowsUpdated > 0)
+                                            System.out.println("Produsul a fost modificat cu succes!");
+                                    }
+                                    else if (getProdus( ).get(i).getCategorie().toString().contains("Laptop-uri"))
+                                    {   System.out.println("");
+                                        System.out.println("Editare Laptop: Nume, Procesor, Ram, Pret");
+                                        String nume_laptop = scanner.next();
+                                        String procesor = scanner.next();
+                                        int ram = scanner.nextInt();
+                                        int pret = scanner.nextInt();
+
+                                        rs = connection.prepareStatement("UPDATE `laptop` SET `nume`=?, `procesor`=?, `ram`=?, `pret`=? WHERE `nume`=? ");
+                                        rs.setString(1,nume_laptop);
+                                        rs.setString(2,procesor);
+                                        rs.setInt(3,ram);
+                                        rs.setInt(4,pret);
+                                        rs.setString(5,getProdus().get(i).getNume());
+                                        int rowsUpdated = rs.executeUpdate();
+                                        if(rowsUpdated > 0)
+                                            System.out.println("Produsul a fost modificat cu succes!");
+                                    }
+                                    else if (getProdus( ).get(i).getCategorie().toString().contains("Telefoane"))
+                                    {   System.out.println("");
+                                        System.out.println("Editare Telefon: Nume, Pixeli Camera, Dimensiune Ecran, Pret");
+                                        String nume_telefon = scanner.next();
+                                        int pixeli = scanner.nextInt();
+                                        int ecran = scanner.nextInt();
+                                        int pret = scanner.nextInt();
+
+                                        rs = connection.prepareStatement("UPDATE `telefon` SET `nume`=?, `pixeli_camera`=?, `dimensiune_ecran`=?, `pret`=? WHERE `nume`=? ");
+                                        rs.setString(1,nume_telefon);
+                                        rs.setInt(2,pixeli);
+                                        rs.setInt(3,ecran);
+                                        rs.setInt(4,pret);
+                                        rs.setString(5,getProdus().get(i).getNume());
+                                        int rowsUpdated = rs.executeUpdate();
+                                        if(rowsUpdated > 0)
+                                            System.out.println("Produsul a fost modificat cu succes!");
+                                    }
+                                }
+                                else if(edit ==  2)
+                                {
+                                    if (getProdus( ).get(i).getCategorie().toString().contains("Aparate Frigorifice"))
+                                    {   System.out.println("");
+                                        rs = connection.prepareStatement("DELETE FROM `frigider` WHERE `nume`=? ");
+                                        rs.setString(1,getProdus().get(i).getNume());
+                                        int rowsUpdated = rs.executeUpdate();
+                                        if(rowsUpdated > 0)
+                                            System.out.println("Produsul a fost sters cu succes!");
+                                    }
+                                    else if (getProdus( ).get(i).getCategorie().toString().contains("Masini de spalat"))
+                                    {   System.out.println("");
+                                        rs = connection.prepareStatement("DELETE FROM `masina_de_spalat` WHERE `nume`=? ");
+                                        rs.setString(1,getProdus().get(i).getNume());
+                                        int rowsUpdated = rs.executeUpdate();
+                                        if(rowsUpdated > 0)
+                                            System.out.println("Produsul a fost sters cu succes!");
+                                    }
+                                    else if (getProdus( ).get(i).getCategorie().toString().contains("Laptop-uri"))
+                                    {   System.out.println("");
+                                        rs = connection.prepareStatement("DELETE FROM `laptop` WHERE `nume`=? ");
+                                        rs.setString(1,getProdus().get(i).getNume());
+                                        int rowsUpdated = rs.executeUpdate();
+                                        if(rowsUpdated > 0)
+                                            System.out.println("Produsul a fost sters cu succes!");
+                                    }
+                                    else if (getProdus( ).get(i).getCategorie().toString().contains("Telefoane"))
+                                    {   System.out.println("");
+                                        rs = connection.prepareStatement("DELETE FROM `telefon` WHERE `nume`=? ");
+                                        rs.setString(1,getProdus().get(i).getNume());
+                                        int rowsUpdated = rs.executeUpdate();
+                                        if(rowsUpdated > 0)
+                                            System.out.println("Produsul a fost sters cu succes!");
+                                    }
+                                }
+                            }
+
+
                     }
                 }
             }

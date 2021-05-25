@@ -26,4 +26,10 @@ public class categorii {
         this.nr_produse = nr_produse;
     }
 
+    @Override
+    public String toString() {
+        return String.format(nume);
+    }
+
+
 }

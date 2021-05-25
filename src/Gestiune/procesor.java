@@ -35,4 +35,9 @@ public class procesor {
     public void setFrecventa(String frecventa) {
         this.frecventa = frecventa;
     }
+
+    @Override
+    public String toString() {
+        return String.format(model);
+    }
 }
